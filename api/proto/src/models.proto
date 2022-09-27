@@ -1,0 +1,49 @@
+syntax = "proto3";
+package wallet_api;
+option go_package = "github.com/h-varmazyar/wallet/api/proto;walletApi";
+
+message Void {}
+
+message Wallet {
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"created_at"
+  int64 CreatedAt = 2;
+  // @inject_tag: json:"updated_at"
+  int64 UpdatedAt = 3;
+  // @inject_tag: json:"phone_number"
+  string PhoneNumber = 4;
+  // @inject_tag: json:"amount"
+  int64 Amount = 5;
+  // @inject_tag: json:"transactions"
+  repeated Transaction Transactions = 6;
+}
+
+message Transaction{
+  enum type{
+    Deposit = 0;
+    Withdraw = 1;
+  }
+  enum status {
+    Success = 0;
+    Failed = 1;
+  }
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"created_at"
+  int64 CreatedAt = 2;
+  // @inject_tag: json:"updated_at"
+  int64 UpdatedAt = 3;
+  // @inject_tag: json:"type"
+  type Type = 4;
+  // @inject_tag: json:"status"
+  status Status = 5;
+  // @inject_tag: json:"amount"
+  int64 Amount = 6;
+  // @inject_tag: json:"wallet_id"
+  string WalletID = 7;
+  // @inject_tag: json:"description"
+  string Description = 8;
+  // @inject_tag: json:"ref_id"
+  string RefID = 9;
+}

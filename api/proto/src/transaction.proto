@@ -1,146 +1,18 @@
 syntax = "proto3";
 package wallet_api;
-option go_package = "github.com/h-varmazyar/wallet/api";
+option go_package = "github.com/h-varmazyar/wallet/api/proto;walletApi";
+import "api/proto/src/models.proto";
 
-service WalletService {
-  rpc ReturnByRef (TransactionReturnReq) returns (Transaction);
-  rpc Verify (TransactionIDReq) returns (api.Void);
-  rpc Refund (TransactionIDReq) returns (api.Void);
-  rpc List (GetTransactionsReq) returns (GetTransactionsResponse);
-  rpc Charge (WalletChargeReq) returns (WalletChargeResponse);
-  rpc VerifyPayment (WalletVerifyPaymentReq) returns (WalletVerifyPaymentRes);
-
+service TransactionService {
+  rpc List (TransactionListReq) returns (Transactions);
 }
 
-message Wallet {
-  // @inject_tag: json:"id"
-  string ID = 1;
-  // @inject_tag: json:"created_at"
-  int64 CreatedAt = 2;
-  // @inject_tag: json:"updated_at"
-  int64 UpdatedAt = 3;
-  // @inject_tag: json:"shop_id"
-  string ShopID = 4;
-  // @inject_tag: json:"withdrawable_amount"
-  int64 WithdrawableAmount = 5;
-  // @inject_tag: json:"locked_amount"
-  int64 LockedAmount = 6;
-  // @inject_tag: json:"transactions"
-  repeated Transaction Transactions = 7;
-}
-
-message Transaction{
-  enum type{
-    Deposit = 0;
-    Withdraw = 1;
-    CASHOUT = 2;
-  }
-  enum status {
-    Locked = 0;
-    Success = 1;
-    Failed = 2;
-    Refund = 3;
-  }
-  // @inject_tag: json:"id"
-  string ID = 1;
-  // @inject_tag: json:"created_at"
-  int64 CreatedAt = 2;
-  // @inject_tag: json:"updated_at"
-  int64 UpdatedAt = 3;
-  // @inject_tag: json:"type"
-  type Type = 4;
-  // @inject_tag: json:"status"
-  status Status = 5;
-  // @inject_tag: json:"amount"
-  int64 Amount = 6;
-  // @inject_tag: json:"wallet_id"
-  string WalletID = 7;
-  // @inject_tag: json:"ref_id"
-  string RefID = 8;
-  // @inject_tag: json:"invoice_id"
-  string InvoiceID = 9;
-  // @inject_tag: json:"receipt_id"
-  string ReceiptID = 10;
-  // @inject_tag: json:"basket_number,omitempty"
-  string BasketNumber = 11;
-}
-
-message NewTransactionReq {
-  // @inject_tag: json:"shop_id"
-  string ShopID = 1;
-  // @inject_tag: json:"amount"
-  int64 Amount = 2;
-  // @inject_tag: json:"ref_id"
-  string RefID = 3;
-  // @inject_tag: json:"description"
-  string Description = 4;
-  // @inject_tag: json:"invoice_id,omitempty"
-  string InvoiceID = 5;
-  // @inject_tag: json:"receipt_id,omitempty"
-  string ReceiptID = 6;
-}
-
-message WalletReturnReq {
-  // @inject_tag: json:"query,omitempty"
-  map<string, string> Query = 1;
-  // @inject_tag: json:"shop_id"
-  string ShopID = 2;
-}
-
-message TransactionReturnReq{
-  // @inject_tag: json:"query"
-  map<string, string> Query = 1;
-  // @inject_tag: json:"ref_id"
-  string RefID = 2;
-}
-
-message TransactionIDReq{
-  // @inject_tag: json:"transaction_id"
-  string TransactionID = 1;
-}
-
-message GetTransactionsReq {
+message TransactionListReq {
   // @inject_tag: json:"wallet_id"
   string WalletID = 1;
-  // @inject_tag: json:"shop_id"
-  string ShopID = 2;
-  // @inject_tag: json:"query"
-  map<string, string> Query = 3;
 }
 
-message GetTransactionsResponse {
+message Transactions {
   // @inject_tag: json:"transactions"
   repeated Transaction Transactions = 1;
-  // @inject_tag: json:"count"
-  int64 Count = 2;
-}
-
-
-message WalletChargeResponse {
-  // @inject_tag: json:"payment_link"
-  string PaymentLink = 1;
-}
-message WalletChargeReq {
-  // @inject_tag: json:"query,omitempty"
-  map<string, string> Query = 1;
-  // @inject_tag: json:"shop_id"
-  string ShopID = 2;
-  // @inject_tag: json:"amount"
-  int64 Amount = 3;
-  // @inject_tag: json:"description"
-  string Description = 4;
-  // @inject_tag: json:"return_url"
-  string returnURL = 5;
-}
-
-message WalletVerifyPaymentReq {
-  // @inject_tag: json:"wallet_id"
-  string WalletID = 1;
-  // @inject_tag: json:"receipt_id"
-  string ReceiptID = 2;
-}
-
-message WalletVerifyPaymentRes {
-  // @inject_tag: json:"amount"
-  int64 Amount = 1;
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/h-varmazyar/wallet/internal/app/transactions"
+	"github.com/h-varmazyar/wallet/internal/app/wallets"
 	"github.com/h-varmazyar/wallet/internal/pkg/db"
 	"github.com/h-varmazyar/wallet/pkg/netext"
 	"github.com/h-varmazyar/wallet/pkg/serverext"
@@ -10,10 +12,15 @@ import (
 	"net/http"
 )
 
+var (
+	logger  *log.Logger
+	configs *Configs
+)
+
 func main() {
 	//todo: create new logger
-	logger := log.New()
-	configs := loadConfigs()
+	logger = log.New()
+	configs = loadConfigs()
 	db := initializeDB(configs.DSN)
 
 	server := serverext.New(logger)
@@ -21,10 +28,10 @@ func main() {
 	registerHandlers(server, configs.HttpPort)
 }
 
-func loadConfigs() *Config {
-	config := new(Config)
+func loadConfigs() *Configs {
+	configs := new(Configs)
 	//todo: load conf
-	return config
+	return configs
 }
 
 func initializeDB(dsn string) *db.DB {
@@ -38,6 +45,9 @@ func initializeDB(dsn string) *db.DB {
 func registerServices(server *serverext.Server, port netext.Port) {
 	server.Serve(port, func(listener net.Listener) error {
 		grpcServer := grpc.NewServer()
+
+		transactions.NewService(configs.TransactionsConfigs, logger).RegisterServer(grpcServer)
+		wallets.NewService(configs.WalletsConfigs, logger).RegisterServer(grpcServer)
 
 		return grpcServer.Serve(listener)
 	})
