@@ -6,7 +6,7 @@ import (
 )
 
 type DB struct {
-	db *gorm.DB
+	*gorm.DB
 }
 
 func New(dsn string) (*DB, error) {

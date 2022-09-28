@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
+	Create(ctx context.Context, in *TransactionCreateReq, opts ...grpc.CallOption) (*Transaction, error)
+	ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Transaction, error)
 	List(ctx context.Context, in *TransactionListReq, opts ...grpc.CallOption) (*Transactions, error)
 }
 
@@ -31,6 +33,24 @@ type transactionServiceClient struct {
 
 func NewTransactionServiceClient(cc grpc.ClientConnInterface) TransactionServiceClient {
 	return &transactionServiceClient{cc}
+}
+
+func (c *transactionServiceClient) Create(ctx context.Context, in *TransactionCreateReq, opts ...grpc.CallOption) (*Transaction, error) {
+	out := new(Transaction)
+	err := c.cc.Invoke(ctx, "/wallet_api.TransactionService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transactionServiceClient) ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Transaction, error) {
+	out := new(Transaction)
+	err := c.cc.Invoke(ctx, "/wallet_api.TransactionService/ChangeStatus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *transactionServiceClient) List(ctx context.Context, in *TransactionListReq, opts ...grpc.CallOption) (*Transactions, error) {
@@ -46,6 +66,8 @@ func (c *transactionServiceClient) List(ctx context.Context, in *TransactionList
 // All implementations must embed UnimplementedTransactionServiceServer
 // for forward compatibility
 type TransactionServiceServer interface {
+	Create(context.Context, *TransactionCreateReq) (*Transaction, error)
+	ChangeStatus(context.Context, *TransactionNewStatusReq) (*Transaction, error)
 	List(context.Context, *TransactionListReq) (*Transactions, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
@@ -54,6 +76,12 @@ type TransactionServiceServer interface {
 type UnimplementedTransactionServiceServer struct {
 }
 
+func (UnimplementedTransactionServiceServer) Create(context.Context, *TransactionCreateReq) (*Transaction, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedTransactionServiceServer) ChangeStatus(context.Context, *TransactionNewStatusReq) (*Transaction, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeStatus not implemented")
+}
 func (UnimplementedTransactionServiceServer) List(context.Context, *TransactionListReq) (*Transactions, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
@@ -68,6 +96,42 @@ type UnsafeTransactionServiceServer interface {
 
 func RegisterTransactionServiceServer(s grpc.ServiceRegistrar, srv TransactionServiceServer) {
 	s.RegisterService(&TransactionService_ServiceDesc, srv)
+}
+
+func _TransactionService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransactionCreateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wallet_api.TransactionService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).Create(ctx, req.(*TransactionCreateReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TransactionService_ChangeStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransactionNewStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransactionServiceServer).ChangeStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wallet_api.TransactionService/ChangeStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransactionServiceServer).ChangeStatus(ctx, req.(*TransactionNewStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TransactionService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -95,6 +159,14 @@ var TransactionService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "wallet_api.TransactionService",
 	HandlerType: (*TransactionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Create",
+			Handler:    _TransactionService_Create_Handler,
+		},
+		{
+			MethodName: "ChangeStatus",
+			Handler:    _TransactionService_ChangeStatus_Handler,
+		},
 		{
 			MethodName: "List",
 			Handler:    _TransactionService_List_Handler,

@@ -17,6 +17,11 @@ var (
 	configs *Configs
 )
 
+const (
+	name    = "Wallet"
+	version = "v1.0.0"
+)
+
 func main() {
 	//todo: create new logger
 	logger = log.New()
@@ -26,6 +31,8 @@ func main() {
 	server := serverext.New(logger)
 	registerServices(server, configs.GRPCPort)
 	registerHandlers(server, configs.HttpPort)
+
+	server.Start(name, version)
 }
 
 func loadConfigs() *Configs {

@@ -27,6 +27,7 @@ message Transaction{
   enum status {
     Success = 0;
     Failed = 1;
+    Pending = 2;
   }
   // @inject_tag: json:"id"
   string ID = 1;

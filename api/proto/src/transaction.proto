@@ -4,7 +4,31 @@ option go_package = "github.com/h-varmazyar/wallet/api/proto;walletApi";
 import "api/proto/src/models.proto";
 
 service TransactionService {
+  rpc Create (TransactionCreateReq) returns (Transaction);
+  rpc ChangeStatus (TransactionNewStatusReq) returns (Transaction);
   rpc List (TransactionListReq) returns (Transactions);
+}
+
+message TransactionCreateReq{
+  // @inject_tag: json:"type"
+  Transaction.type Type = 1;
+  // @inject_tag: json:"status"
+  Transaction.status Status = 2;
+  // @inject_tag: json:"amount"
+  int64 Amount = 3;
+  // @inject_tag: json:"wallet_id"
+  string WalletID = 4;
+  // @inject_tag: json:"description"
+  string Description = 5;
+  // @inject_tag: json:"ref_id"
+  string RefID = 6;
+}
+
+message TransactionNewStatusReq{
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"new_status"
+  Transaction.status NewStatus= 2;
 }
 
 message TransactionListReq {
