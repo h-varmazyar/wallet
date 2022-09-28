@@ -5,7 +5,7 @@ import "api/proto/src/models.proto";
 
 service TransactionService {
   rpc Create (TransactionCreateReq) returns (Transaction);
-  rpc ChangeStatus (TransactionNewStatusReq) returns (Transaction);
+  rpc ChangeStatus (TransactionNewStatusReq) returns (Void);
   rpc List (TransactionListReq) returns (Transactions);
 }
 

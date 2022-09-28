@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WalletServiceClient interface {
+	Create(ctx context.Context, in *WalletCreateReq, opts ...grpc.CallOption) (*Wallet, error)
 	Deposit(ctx context.Context, in *NewTransaction, opts ...grpc.CallOption) (*Wallet, error)
 	Withdrawal(ctx context.Context, in *NewTransaction, opts ...grpc.CallOption) (*Wallet, error)
 	ReturnByPhoneNumber(ctx context.Context, in *WalletReturnByPhoneReq, opts ...grpc.CallOption) (*Wallet, error)
@@ -33,6 +34,15 @@ type walletServiceClient struct {
 
 func NewWalletServiceClient(cc grpc.ClientConnInterface) WalletServiceClient {
 	return &walletServiceClient{cc}
+}
+
+func (c *walletServiceClient) Create(ctx context.Context, in *WalletCreateReq, opts ...grpc.CallOption) (*Wallet, error) {
+	out := new(Wallet)
+	err := c.cc.Invoke(ctx, "/wallet_api.WalletService/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *walletServiceClient) Deposit(ctx context.Context, in *NewTransaction, opts ...grpc.CallOption) (*Wallet, error) {
@@ -66,6 +76,7 @@ func (c *walletServiceClient) ReturnByPhoneNumber(ctx context.Context, in *Walle
 // All implementations must embed UnimplementedWalletServiceServer
 // for forward compatibility
 type WalletServiceServer interface {
+	Create(context.Context, *WalletCreateReq) (*Wallet, error)
 	Deposit(context.Context, *NewTransaction) (*Wallet, error)
 	Withdrawal(context.Context, *NewTransaction) (*Wallet, error)
 	ReturnByPhoneNumber(context.Context, *WalletReturnByPhoneReq) (*Wallet, error)
@@ -76,6 +87,9 @@ type WalletServiceServer interface {
 type UnimplementedWalletServiceServer struct {
 }
 
+func (UnimplementedWalletServiceServer) Create(context.Context, *WalletCreateReq) (*Wallet, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
 func (UnimplementedWalletServiceServer) Deposit(context.Context, *NewTransaction) (*Wallet, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
 }
@@ -96,6 +110,24 @@ type UnsafeWalletServiceServer interface {
 
 func RegisterWalletServiceServer(s grpc.ServiceRegistrar, srv WalletServiceServer) {
 	s.RegisterService(&WalletService_ServiceDesc, srv)
+}
+
+func _WalletService_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WalletCreateReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WalletServiceServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/wallet_api.WalletService/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WalletServiceServer).Create(ctx, req.(*WalletCreateReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _WalletService_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -159,6 +191,10 @@ var WalletService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "wallet_api.WalletService",
 	HandlerType: (*WalletServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Create",
+			Handler:    _WalletService_Create_Handler,
+		},
 		{
 			MethodName: "Deposit",
 			Handler:    _WalletService_Deposit_Handler,

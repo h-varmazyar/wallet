@@ -29,7 +29,7 @@ func NewRepository(db *db.DB, logger *log.Logger) Repository {
 }
 
 func (r *repository) Create(_ context.Context, wallet *entity.Wallet) (*entity.Wallet, error) {
-	//todo: validate wallet
+	//TODO validate wallet
 	count := int64(0)
 	if err := r.db.
 		Model(new(entity.Wallet)).

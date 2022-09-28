@@ -36,6 +36,19 @@ func (s *Service) RegisterServer(server *grpc.Server) {
 	walletApi.RegisterWalletServiceServer(server, s)
 }
 
+func (s *Service) Create(ctx context.Context, req *walletApi.WalletCreateReq) (*walletApi.Wallet, error) {
+	wallet := new(entity.Wallet)
+	mapper.Struct(req, wallet)
+
+	if tx, err := s.repository.Create(ctx, wallet); err != nil {
+		return nil, err
+	} else {
+		response := new(walletApi.Wallet)
+		mapper.Struct(tx, response)
+		return response, nil
+	}
+}
+
 func (s *Service) Deposit(ctx context.Context, req *walletApi.NewTransaction) (*walletApi.Wallet, error) {
 	var (
 		err             error

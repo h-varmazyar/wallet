@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TransactionServiceClient interface {
 	Create(ctx context.Context, in *TransactionCreateReq, opts ...grpc.CallOption) (*Transaction, error)
-	ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Transaction, error)
+	ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Void, error)
 	List(ctx context.Context, in *TransactionListReq, opts ...grpc.CallOption) (*Transactions, error)
 }
 
@@ -44,8 +44,8 @@ func (c *transactionServiceClient) Create(ctx context.Context, in *TransactionCr
 	return out, nil
 }
 
-func (c *transactionServiceClient) ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Transaction, error) {
-	out := new(Transaction)
+func (c *transactionServiceClient) ChangeStatus(ctx context.Context, in *TransactionNewStatusReq, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
 	err := c.cc.Invoke(ctx, "/wallet_api.TransactionService/ChangeStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (c *transactionServiceClient) List(ctx context.Context, in *TransactionList
 // for forward compatibility
 type TransactionServiceServer interface {
 	Create(context.Context, *TransactionCreateReq) (*Transaction, error)
-	ChangeStatus(context.Context, *TransactionNewStatusReq) (*Transaction, error)
+	ChangeStatus(context.Context, *TransactionNewStatusReq) (*Void, error)
 	List(context.Context, *TransactionListReq) (*Transactions, error)
 	mustEmbedUnimplementedTransactionServiceServer()
 }
@@ -79,7 +79,7 @@ type UnimplementedTransactionServiceServer struct {
 func (UnimplementedTransactionServiceServer) Create(context.Context, *TransactionCreateReq) (*Transaction, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedTransactionServiceServer) ChangeStatus(context.Context, *TransactionNewStatusReq) (*Transaction, error) {
+func (UnimplementedTransactionServiceServer) ChangeStatus(context.Context, *TransactionNewStatusReq) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeStatus not implemented")
 }
 func (UnimplementedTransactionServiceServer) List(context.Context, *TransactionListReq) (*Transactions, error) {

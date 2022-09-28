@@ -4,9 +4,16 @@ option go_package = "github.com/h-varmazyar/wallet/api/proto;walletApi";
 import "api/proto/src/models.proto";
 
 service WalletService {
+  rpc Create (WalletCreateReq) returns (Wallet);
   rpc Deposit (NewTransaction) returns (Wallet);
   rpc Withdrawal (NewTransaction) returns (Wallet);
   rpc ReturnByPhoneNumber (WalletReturnByPhoneReq) returns (Wallet);
+}
+
+message WalletCreateReq{
+  string PhoneNumber = 1;
+  // @inject_tag: json:"amount"
+  int64 Amount = 2;
 }
 
 message NewTransaction{
