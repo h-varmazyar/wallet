@@ -26,12 +26,13 @@ func NewHandler(configs *Configs, logger *log.Logger) *Handler {
 func (h *Handler) RegisterRoutes(router *gin.Engine) {
 	walletRoutes := router.Group("/wallets")
 
-	walletRoutes.GET("/phone/{phone-number}", h.returnByPhoneNumber)
+	walletRoutes.GET("/phone/:phone_number", h.returnByPhoneNumber)
 
 }
 
 func (h *Handler) returnByPhoneNumber(c *gin.Context) {
 	req := new(walletApi.WalletReturnByPhoneReq)
+	req.PhoneNumber = c.Param("phone_number")
 	if wallet, err := h.walletService.ReturnByPhoneNumber(c, req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
