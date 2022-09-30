@@ -7,10 +7,9 @@ import (
 )
 
 type Configs struct {
-	DSN      string      `yaml:"dsn"`
-	GRPCPort netext.Port `yaml:"grpc_port"`
-	HttpPort netext.Port `yaml:"http_port"`
-
-	TransactionsConfigs *transactions.Configs
-	WalletsConfigs      *wallets.Configs
+	DSN                 string                `yaml:"dsn"`
+	GRPCPort            netext.Port           `yaml:"grpc_port"`
+	HttpPort            netext.Port           `yaml:"http_port"`
+	TransactionsConfigs *transactions.Configs `yaml:"transactions_configs"`
+	WalletsConfigs      *wallets.Configs      `yaml:"wallets_configs"`
 }

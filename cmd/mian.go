@@ -10,7 +10,9 @@ import (
 	"github.com/h-varmazyar/wallet/pkg/serverext"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
+	"io/ioutil"
 	"net"
 	"net/http"
 )
@@ -27,12 +29,13 @@ const (
 
 func main() {
 	//todo: create new logger
-	logger = log.New()
+	logger = log.StandardLogger()
 	configs = loadConfigs()
-	db := initializeDB(configs.DSN)
+
+	dbInstance := initializeDB(configs.DSN)
 
 	server := serverext.New(logger)
-	registerServices(server, db, configs.GRPCPort)
+	registerServices(server, dbInstance, configs.GRPCPort)
 	registerHandlers(server, configs.HttpPort)
 
 	server.Start(name, version)
@@ -40,7 +43,15 @@ func main() {
 
 func loadConfigs() *Configs {
 	configs := new(Configs)
-	//todo: load conf
+
+	confBytes, err := ioutil.ReadFile("configs/default.yaml")
+	if err != nil {
+		log.WithError(err).Fatal("can not load yaml file")
+	}
+	if err = yaml.Unmarshal(confBytes, configs); err != nil {
+		log.WithError(err).Fatal("can not unmarshal yaml file")
+	}
+
 	return configs
 }
 
@@ -49,7 +60,6 @@ func initializeDB(dsn string) *db.DB {
 	if err != nil {
 		log.Panicf(`failed to instantiate new database: %v`, err)
 	}
-
 	if err = dbInstance.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
 			return err
@@ -67,20 +77,20 @@ func initializeDB(dsn string) *db.DB {
 
 func migrateModels(db *gorm.DB) error {
 	if err := db.AutoMigrate(
-		new(entity.Transaction),
 		new(entity.Wallet),
+		new(entity.Transaction),
 	); err != nil {
 		return err
 	}
 	return nil
 }
 
-func registerServices(server *serverext.Server, db *db.DB, port netext.Port) {
+func registerServices(server *serverext.Server, dbInstance *db.DB, port netext.Port) {
 	server.Serve(port, func(listener net.Listener) error {
 		grpcServer := grpc.NewServer()
 
-		transactions.NewService(configs.TransactionsConfigs, db, logger).RegisterServer(grpcServer)
-		wallets.NewService(configs.WalletsConfigs, db, logger).RegisterServer(grpcServer)
+		transactions.NewService(configs.TransactionsConfigs, dbInstance, logger).RegisterServer(grpcServer)
+		wallets.NewService(configs.WalletsConfigs, dbInstance, logger).RegisterServer(grpcServer)
 
 		return grpcServer.Serve(listener)
 	})

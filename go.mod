@@ -8,6 +8,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.0
+	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.3.10
 	gorm.io/gorm v1.23.10
 )
