@@ -17,7 +17,7 @@ type Service struct {
 	walletApi.UnimplementedWalletServiceServer
 	repository         Repository
 	configs            *Configs
-	log                *log.Logger
+	logger             *log.Logger
 	transactionService walletApi.TransactionServiceClient
 }
 
@@ -26,7 +26,7 @@ func NewService(configs *Configs, db *db.DB, logger *log.Logger) *Service {
 	service := &Service{
 		repository:         NewRepository(db, logger),
 		configs:            configs,
-		log:                logger,
+		logger:             logger,
 		transactionService: walletApi.NewTransactionServiceClient(walletConn),
 	}
 	return service
@@ -81,17 +81,19 @@ func (s *Service) Deposit(ctx context.Context, req *walletApi.NewTransaction) (*
 	}
 
 	if err = s.repository.Deposit(ctx, walletID, req.Amount); err != nil {
-		if err = s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Failed); err != nil {
-			//todo: log error
+		s.logger.WithError(err).Errorf("failed to deposit wallet %v for tx %v", walletID, tx.ID)
+		if txChangeErr := s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Failed); txChangeErr != nil {
+			s.logger.WithError(txChangeErr).Errorf("failed to cancel tx %v", tx.ID)
 		}
-		return nil, errors.New("failed to deposit wallet")
+		return nil, err
 	}
 
 	if err = s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Success); err != nil {
-		if err = s.repository.Withdrawal(ctx, walletID, req.Amount); err != nil {
-			//todo: log error
+		s.logger.WithError(err).Errorf("failed to verify tx %v", tx.ID)
+		if withdrawalErr := s.repository.Withdrawal(ctx, walletID, req.Amount); withdrawalErr != nil {
+			s.logger.WithError(withdrawalErr).Errorf("failed to withdrawal wallet %v for tx %v", walletID, tx.ID)
 		}
-		return nil, errors.New("failed to deposit wallet")
+		return nil, err
 	}
 
 	if wallet, err = s.repository.ReturnByID(ctx, walletID); err != nil {
@@ -135,17 +137,19 @@ func (s *Service) Withdrawal(ctx context.Context, req *walletApi.NewTransaction)
 	}
 
 	if err = s.repository.Withdrawal(ctx, walletID, req.Amount); err != nil {
-		if err = s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Failed); err != nil {
-			//todo: log error
+		s.logger.WithError(err).Errorf("failed to withdrawal wallet %v for tx %v", walletID, tx.ID)
+		if txChangeErr := s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Failed); txChangeErr != nil {
+			s.logger.WithError(txChangeErr).Errorf("failed to cancel tx %v", tx.ID)
 		}
-		return nil, errors.New("failed to deposit wallet")
+		return nil, err
 	}
 
 	if err = s.changeTxStatus(ctx, tx.ID, walletApi.Transaction_Success); err != nil {
-		if err = s.repository.Deposit(ctx, walletID, req.Amount); err != nil {
-			//todo: log error
+		s.logger.WithError(err).Errorf("failed to verify tx %v", tx.ID)
+		if depositErr := s.repository.Deposit(ctx, walletID, req.Amount); depositErr != nil {
+			s.logger.WithError(depositErr).Errorf("failed to deposit wallet %v for tx %v", walletID, tx.ID)
 		}
-		return nil, errors.New("failed to deposit wallet")
+		return nil, err
 	}
 
 	if wallet, err = s.repository.ReturnByID(ctx, walletID); err != nil {

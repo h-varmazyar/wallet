@@ -1,7 +1,7 @@
 syntax = "proto3";
 package wallet_api;
 option go_package = "github.com/h-varmazyar/wallet/api/proto;walletApi";
-import "api/proto/src/models.proto";
+import "api/proto/src/walletModels.proto";
 
 service WalletService {
   rpc Create (WalletCreateReq) returns (Wallet);
