@@ -1,0 +1,84 @@
+openapi: 3.0.1
+info:
+  title: Wallet API
+  version: v1.0.0
+servers:
+  - url: 'http://localhost:5001'
+
+paths:
+  /wallets/phone/{phone_number}:
+    get:
+      operationId: wallet_info
+      summary: return info of wallet
+      parameters:
+        - $ref: '#/components/parameters/phone_number'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  parameters:
+    phone_number:
+      name: phone_number
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      readOnly: true
+      properties:
+        message:
+          type: string
+          description: Localized error message
+        details:
+          type: array
+          items:
+            type: string
+          description: Systematic error details
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Wallet primary key
+        phone_number:
+          type: string
+          description: Wallet owner phone number
+        amount:
+          type: number
+          description: Wallet amount
+        created_at:
+          type: number
+          format: 'date-time'
+          readOnly: true
+          description: Wallet record created time
+        updated_at:
+          type: number
+          format: 'date-time'
+          readOnly: true
+          description: Wallet record latest update time
