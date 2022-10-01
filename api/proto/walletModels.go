@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 )
 
-func (x *TransactionStatus) InRange(v interface{}) bool {
+func (TransactionStatus) InRange(v interface{}) bool {
 	_, ok := TransactionStatus_value[v.(TransactionStatus).String()]
 	return ok
 }
@@ -24,11 +24,11 @@ func (x *TransactionStatus) UnmarshalJSON(b []byte) error {
 	*x = TransactionStatus(TransactionStatus_value[str])
 	return nil
 }
-func (x *TransactionStatus) MarshalJSON() ([]byte, error) {
+func (x TransactionStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(x.String())
 }
 
-func (x *TransactionType) InRange(v interface{}) bool {
+func (TransactionType) InRange(v interface{}) bool {
 	_, ok := TransactionType_value[v.(TransactionType).String()]
 	return ok
 }
@@ -47,6 +47,6 @@ func (x *TransactionType) UnmarshalJSON(b []byte) error {
 	*x = TransactionType(TransactionType_value[str])
 	return nil
 }
-func (x *TransactionType) MarshalJSON() ([]byte, error) {
+func (x TransactionType) MarshalJSON() ([]byte, error) {
 	return json.Marshal(x.String())
 }

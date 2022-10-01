@@ -6,6 +6,7 @@ import (
 	walletApi "github.com/h-varmazyar/wallet/api/proto"
 	"github.com/h-varmazyar/wallet/internal/pkg/db"
 	"github.com/h-varmazyar/wallet/internal/pkg/entity"
+	"github.com/h-varmazyar/wallet/pkg/validatorext"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,8 +26,10 @@ func NewRepository(db *db.DB, logger *log.Logger) Repository {
 	return &repository{logger, db}
 }
 
-func (r repository) Create(_ context.Context, transaction *entity.Transaction) (*entity.Transaction, error) {
-	//TODO: validate tx
+func (r repository) Create(ctx context.Context, transaction *entity.Transaction) (*entity.Transaction, error) {
+	if err := validatorext.Struct(ctx, transaction); err != nil {
+		return nil, err
+	}
 	if err := r.db.Save(transaction).Error; err != nil {
 		return nil, err
 	}
